@@ -1,0 +1,82 @@
+# compiled output
+/dist
+/node_modules
+package-lock.json
+yarn.lock
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# OS
+.DS_Store
+.npmrc
+.nvmrc
+
+# Tests
+/coverage
+/.nyc_output
+test-results
+test-results/*
+test-report.xml
+junit.xml
+sonar-project.properties
+gl-sast-report.json
+gl-secret-detection-report.json
+semgrep.sarif
+.scannerwork
+codecov
+codecov.*
+!codecov.yml
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# FILES
+*.tgz
+*.zip
+*.rar
+
+# ENVIROMENTS
+./*.env
+./.*.env
+.*.env
+./.env.*
+.env.*
+.env
+!.env.test
+!.env.example
+
+# DATA
+.mongo_data
+.mongo_data/*
+./.mongo_data
+.postgres_data
+.postgres_data/*
+./.postgres_data
+.mysql_data
+.mysql_data/*
+./.mysql_data
+.redis_data
+.redis_data/*
+./.redis_data
+.elasticsearch-data/*
+./.elasticsearch-data
+
