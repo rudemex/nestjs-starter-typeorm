@@ -28,6 +28,8 @@ services:
       TZ: 'America/Argentina/Buenos_Aires'
       PGADMIN_DEFAULT_EMAIL: root@admin.com
       PGADMIN_DEFAULT_PASSWORD: root
+    depends_on:
+      - postgres
 
   mysql:
     image: mysql:5.7

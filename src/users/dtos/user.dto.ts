@@ -1,5 +1,7 @@
-import { IsEmail, IsOptional, IsString } from '@nestjs/class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsEmail, IsEnum, IsOptional, IsString } from '@nestjs/class-validator';
+import { PartialType, ApiProperty } from '@nestjs/swagger';
+
+import { Gender, Seniority } from '../interfaces/user.interface'; // Asegurate de que el path sea correcto
 
 export class CreateUserDto {
   @IsString()
@@ -24,83 +26,33 @@ export class CreateUserDto {
   })
   readonly email: string;
 
-  @IsString()
+  @IsEnum(Gender)
   @ApiProperty({
-    example: 'male',
-    description:
-      'The gender of the user. Possible values are "male", "female", or "x" for non-binary or unspecified.',
+    example: Gender.MALE,
+    enum: Gender,
+    enumName: 'Gender',
+    description: 'The gender of the user.',
   })
-  readonly gender: string;
+  readonly gender: Gender;
 
-  @IsString()
+  @IsEnum(Seniority)
   @ApiProperty({
-    example: 'semi-senior',
-    description:
-      'The seniority level of the user within the organization. Possible values are "trainee", "jr", "semi-senior", and "senior".',
+    example: Seniority.SEMI_SENIOR,
+    enum: Seniority,
+    enumName: 'Seniority',
+    description: 'The seniority level of the user within the organization.',
   })
-  readonly seniority: string;
+  readonly seniority: Seniority;
 
+  @IsOptional()
   @IsString()
   @ApiProperty({
     required: false,
-    example: '',
-    description:
-      "A brief description of the user's professional experience. This field is optional and can be left blank.",
-  })
-  readonly experience: string;
-}
-
-export class UpdateUserDto {
-  @IsString()
-  @IsOptional()
-  @ApiProperty({
-    example: 'Juan',
-    description: 'The first name of the user.',
-  })
-  readonly firstName?: string;
-
-  @IsString()
-  @IsOptional()
-  @ApiProperty({
-    example: 'Perez',
-    description: 'The last name of the user.',
-  })
-  readonly lastName?: string;
-
-  @IsString()
-  @IsEmail()
-  @IsOptional()
-  @ApiProperty({
-    example: 'juan.perez@mail.com',
-    description: 'The email address of the user. It is unique and used for login.',
-  })
-  readonly email?: string;
-
-  @IsString()
-  @IsOptional()
-  @ApiProperty({
-    example: 'male',
-    description:
-      'The gender of the user. Possible values are "male", "female", or "x" for non-binary or unspecified.',
-  })
-  readonly gender?: string;
-
-  @IsString()
-  @IsOptional()
-  @ApiProperty({
-    example: 'semi-senior',
-    description:
-      'The seniority level of the user within the organization. Possible values are "trainee", "jr", "semi-senior", and "senior".',
-  })
-  readonly seniority?: string;
-
-  @IsString()
-  @IsOptional()
-  @ApiProperty({
-    required: false,
-    example: '',
-    description:
-      "A brief description of the user's professional experience. This field is optional and can be left blank.",
+    example: '3 years of experience in software development',
+    description: 'A brief description of the user’s experience.',
   })
   readonly experience?: string;
 }
+
+export class UpdateUserDto extends PartialType(CreateUserDto) {}
+

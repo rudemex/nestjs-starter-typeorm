@@ -9,6 +9,7 @@ import {
   TracingInterceptor,
 } from '@tresdoce-nestjs-toolkit/paas';
 import { HttpClientInterceptor, HttpClientModule } from '@tresdoce-nestjs-toolkit/http-client';
+import { TypeOrmClientModule } from '@tresdoce-nestjs-toolkit/typeorm';
 
 import { UtilsModule } from './utils/utils.module';
 import { UsersModule } from './users/users.module';
@@ -33,6 +34,7 @@ import { getEnvFilePath, config, validationSchema } from './config';
     TracingModule,
     HttpClientModule,
     UtilsModule,
+    TypeOrmClientModule,
     CharactersModule,
     UsersModule,
   ],

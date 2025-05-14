@@ -2,6 +2,7 @@ import { getSkipHealthChecks, Typings } from '@tresdoce-nestjs-toolkit/paas';
 import { registerAs } from '@nestjs/config';
 
 import * as PACKAGE_JSON from '../../package.json';
+import { TypeOrmModuleOptions } from '@tresdoce-nestjs-toolkit/typeorm';
 
 export default registerAs(
   'config',
@@ -46,10 +47,20 @@ export default registerAs(
       },
       exporter: {
         url: process.env.TRACING_ENDPOINT,
-        /*headers: {
-          Authorization: `${process.env.TRACING_AUTH_TOKEN}`,
-        },*/
       },
+    },
+    database: {
+      typeorm: {
+        type: process.env.DATABASE_TYPE,
+        host: process.env.DATABASE_HOST,
+        port: parseInt(process.env.DATABASE_PORT, 10),
+        username: encodeURIComponent(process.env.DATABASE_USERNAME),
+        password: encodeURIComponent(process.env.DATABASE_PASSWORD),
+        database: encodeURIComponent(process.env.DATABASE_DB_NAME),
+        synchronize: process.env.DATABASE_DB_SYNC.toLowerCase() === 'true',
+        autoLoadEntities: process.env.DATABASE_DB_AUTO_LOAD_ENTITIES.toLowerCase() === 'true',
+        entities: [`${__dirname}/**/*.entity{.ts,.js}`],
+      } as TypeOrmModuleOptions,
     },
     params: {
       testEnv: process.env.TEST_KEY,
