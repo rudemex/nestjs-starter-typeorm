@@ -56,13 +56,13 @@ jobs:
         env:
           NODE_ENV: 'test'
 
-      - name: "📊 Publish Test Report"
-        uses: dorny/test-reporter@v1.9.1
-        if: success() || failure()
-        with:
-          name: "Test Report (${{ matrix.node }})"
-          path: './junit.xml'
-          reporter: jest-junit
+      #- name: "📊 Publish Test Report"
+      #  uses: dorny/test-reporter@v1.9.1
+      #  if: success() || failure()
+      #  with:
+      #    name: "Test Report (${{ matrix.node }})"
+      #    path: './junit.xml'
+      #    reporter: jest-junit
 
       #- name: "📊 Upload coverage report to Codecov"
       #  uses: codecov/codecov-action@v5.4.0
