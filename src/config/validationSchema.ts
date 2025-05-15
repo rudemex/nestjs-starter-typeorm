@@ -17,4 +17,5 @@ export const validationSchema = validateSchemaForApp({
   DATABASE_DB_NAME: Joi.string().required(),
   DATABASE_DB_SYNC: Joi.boolean().default(false),
   DATABASE_DB_AUTO_LOAD_ENTITIES: Joi.boolean().default(false),
+  DATABASE_INSECURE_AUTH: Joi.boolean().default(false),
 });
