@@ -1,19 +1,34 @@
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { PaginationResponse } from '@tresdoce-nestjs-toolkit/paas';
+import { TypeOrmClientModule } from '@tresdoce-nestjs-toolkit/typeorm';
 
 import { UsersController } from '../controllers/users.controller';
 import { UsersService } from '../services/users.service';
 import { CreateUserDto, UpdateUserDto } from '../dtos/user.dto';
 import { User } from '../entities/user.entity';
+import { Gender, Seniority } from '../interfaces/user.interface';
+import { config, validationSchema } from '../../config';
 
 describe('UsersController', () => {
   let app: INestApplication;
   let controller: UsersController;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const moduleRef: TestingModule = await Test.createTestingModule({
-      imports: [],
+      imports: [
+        ConfigModule.forRoot({
+          envFilePath: 'env.test',
+          ignoreEnvFile: false,
+          load: [config],
+          isGlobal: true,
+          validationSchema,
+        }),
+        TypeOrmClientModule,
+        TypeOrmModule.forFeature([User]),
+      ],
       controllers: [UsersController],
       providers: [UsersService],
     }).compile();
@@ -24,86 +39,68 @@ describe('UsersController', () => {
     await app.init();
   });
 
-  afterEach(async () => {
+  afterAll(async () => {
     await app.close();
   });
 
-  it('should be defined', async () => {
+  it('should be defined', () => {
     expect(controller).toBeDefined();
   });
 
-  it('should be return find user by id', async () => {
-    const response: User = await controller.findOne(3);
-    expect(response).toBeDefined();
-    expect(response).toEqual(expect.any(Object));
-    expect(response).toHaveProperty('id');
-    expect(response).toHaveProperty('firstName');
-    expect(response).toHaveProperty('lastName');
-    expect(response).toHaveProperty('email');
-    expect(response).toHaveProperty('gender');
-    expect(response).toHaveProperty('seniority');
-    expect(response).toHaveProperty('experience');
-  });
-
-  it('should be return users without pagination', async () => {
-    const response: PaginationResponse<User> = await controller.findAll();
-    expect(response).toBeDefined();
-    expect(response).toEqual(expect.any(Object));
-    expect(response).toHaveProperty('data');
-    expect(response.data).toEqual(expect.any(Array));
-    expect(response.data).toHaveLength(10);
-    expect(response).toHaveProperty('meta');
-    expect(response.meta).toHaveProperty('page');
-    expect(response.meta).toHaveProperty('size');
-    expect(response.meta).toHaveProperty('total');
-    expect(response.meta).toHaveProperty('totalPages');
-    expect(response.meta).toHaveProperty('hasNext');
-    expect(response.meta).toHaveProperty('hasPrevious');
-  });
-
-  it('should be return users with pagination', async () => {
-    const response: PaginationResponse<User> = await controller.findAll({ page: 2, size: 5 });
-    expect(response).toBeDefined();
-    expect(response).toEqual(expect.any(Object));
-    expect(response).toHaveProperty('data');
-    expect(response.data).toEqual(expect.any(Array));
-    expect(response.data).toHaveLength(5);
-    expect(response).toHaveProperty('meta');
-    expect(response.meta).toHaveProperty('page');
-    expect(response.meta).toHaveProperty('size');
-    expect(response.meta).toHaveProperty('total');
-    expect(response.meta).toHaveProperty('totalPages');
-    expect(response.meta).toHaveProperty('hasNext');
-    expect(response.meta).toHaveProperty('hasPrevious');
-  });
-
-  it('should be create user', async () => {
+  it('should create a user', async () => {
     const payload: CreateUserDto = {
-      firstName: 'TestName',
-      lastName: 'TestLastName',
-      email: 'test@mail.com',
-      gender: 'x',
-      seniority: 'senior',
-      experience: '',
+      firstName: 'Test',
+      lastName: 'User',
+      email: 'test.user@mail.com',
+      gender: 'x' as Gender,
+      seniority: 'jr' as Seniority,
+      experience: 'testing',
     };
-    const response: User = await controller.create(payload);
-    expect(response).toEqual(expect.objectContaining(payload));
+
+    const user = await controller.create(payload);
+    expect(user).toHaveProperty('id');
+    expect(user.email).toBe(payload.email);
   });
 
-  it('should be update user', async () => {
+  it('should return paginated users', async () => {
+    const response: PaginationResponse<User> = await controller.findAll();
+    expect(response).toHaveProperty('data');
+    expect(Array.isArray(response.data)).toBe(true);
+    expect(response).toHaveProperty('meta');
+  });
+
+  it('should return a single user', async () => {
+    const users = await controller.findAll();
+    const first = users.data[0];
+    const user = await controller.findOne(first.id);
+    expect(user).toHaveProperty('email', first.email);
+  });
+
+  it('should update a user', async () => {
+    const users = await controller.findAll();
+    const target = users.data[0];
+
     const changes: UpdateUserDto = {
-      firstName: 'Mex',
-      lastName: 'Delgado',
-      email: 'madelgado@prismamp.com',
-      seniority: 'senior',
-      experience: 'master of developer',
+      firstName: 'UpdatedName',
+      seniority: 'senior' as Seniority,
     };
-    const response: User = await controller.update(1, changes);
-    expect(response).toEqual(expect.objectContaining(changes));
+
+    const updated = await controller.update(target.id, changes);
+    expect(updated.firstName).toBe(changes.firstName);
+    expect(updated.seniority).toBe(changes.seniority);
   });
 
-  it('should be delete user', async () => {
-    const response = await controller.remove(5);
-    expect(response).toBeTruthy();
+  it('should delete a user', async () => {
+    const newUser = await controller.create({
+      firstName: 'Delete',
+      lastName: 'Me',
+      email: 'delete.me@mail.com',
+      gender: 'female' as Gender,
+      seniority: 'trainee' as Seniority,
+      experience: '',
+    });
+
+    const response = await controller.remove(newUser.id);
+    expect(response).toEqual({ success: true });
   });
 });

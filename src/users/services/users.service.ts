@@ -1,7 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import {
   calculatePagination,
   IPaginateData,
@@ -27,6 +24,10 @@ export class UsersService {
     });
 
     const meta: IPaginateData = calculatePagination({ total, page, size });
+
+    if (total === 0 || page > meta.totalPages) {
+      throw new BadRequestException(`The page #${page} is greater than the total pages.`);
+    }
 
     return { data: users, meta };
   }

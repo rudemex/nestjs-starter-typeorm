@@ -1,7 +1,7 @@
 {
-  "name": "nestjs-starter",
+  "name": "nestjs-starter-typeorm",
   "version": "1.0.0",
-  "description": "NestJS Starter - Server",
+  "description": "NestJS Starter TypeORM - Server",
   "author": {
     "name": "Maximiliano \"Mex\" Delgado",
     "email": "mdelgado@tresdoce.com.ar",
@@ -9,12 +9,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rudemex/nestjs-starter.git"
+    "url": "git+https://github.com/rudemex/nestjs-starter-typeorm.git"
   },
   "bugs": {
-    "url": "https://github.com/rudemex/nestjs-starter/issues"
+    "url": "https://github.com/rudemex/nestjs-starter-typeorm/issues"
   },
-  "homepage": "https://github.com/rudemex/nestjs-starter#readme",
+  "homepage": "https://github.com/rudemex/nestjs-starter-typeorm#readme",
   "private": true,
   "license": "MIT",
   "scripts": {
