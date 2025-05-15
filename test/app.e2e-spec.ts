@@ -1,15 +1,26 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { HttpStatus, INestApplication } from '@nestjs/common';
 import request from 'supertest';
+import path from 'path';
+import fs from 'fs';
+import { createMock } from '@tresdoce-nestjs-toolkit/test-utils';
+import { Typings } from '@tresdoce-nestjs-toolkit/paas';
+import { ConfigService } from '@nestjs/config';
 
 import { AppModule } from '../src/app.module';
 import { CreateUserDto, UpdateUserDto } from '../src/users/dtos/user.dto';
 import { Gender, Seniority } from '../src/users/interfaces/user.interface';
 
-jest.setTimeout(80000);
+const readFixtureFile = (filePath: string) => {
+  const absolutePath = path.resolve(__dirname, filePath);
+  const fileContents = fs.readFileSync(absolutePath, 'utf8');
+  return JSON.parse(fileContents);
+};
 
+jest.setTimeout(80000);
 describe('AppController (e2e)', () => {
   let app: INestApplication;
+  let appConfig: Typings.AppConfig;
   let createdUserId: number;
 
   beforeEach(async () => {
@@ -18,6 +29,7 @@ describe('AppController (e2e)', () => {
     }).compile();
 
     app = moduleRef.createNestApplication();
+    appConfig = app.get<ConfigService>(ConfigService)['internalConfig']['config'];
     await app.init();
   });
 
@@ -47,42 +59,112 @@ describe('AppController (e2e)', () => {
     return request(app.getHttpServer()).get('/health/readiness').expect(200);
   });
 
-  it('(GET) /characters', () => {
+  it('(GET) /character', () => {
+    createMock({
+      url: `${appConfig.services.rickAndMortyAPI.url}/character`,
+      method: 'get',
+      statusCode: 200,
+      options: {
+        encodedQueryParams: true,
+      },
+      responseBody: readFixtureFile('../fixtures/characters/response-200.json'),
+    });
+
     return request(app.getHttpServer())
       .get('/characters')
       .expect(200)
       .expect((res) => {
         expect(res.body).toHaveProperty('info');
         expect(res.body).toHaveProperty('results');
-      });
-  });
-
-  it('(GET) /characters - with query params', () => {
-    return request(app.getHttpServer())
-      .get('/characters')
-      .query({ name: 'morty' })
-      .query({ status: 'alive' })
-      .query({ gender: 'female' })
-      .expect(200)
-      .expect((res) => {
-        expect(res.body).toHaveProperty('info');
-        expect(res.body.info).toHaveProperty('count');
-        expect(res.body.info).toHaveProperty('pages');
+        expect(res.body.info).toHaveProperty('count', 826);
+        expect(res.body.info).toHaveProperty('pages', 42);
         expect(res.body.info).toHaveProperty('next');
         expect(res.body.info).toHaveProperty('prev');
         expect(res.body).toHaveProperty('results');
         expect(res.body.results.length).toBeGreaterThan(0);
+        expect(res.body.results[0]).toHaveProperty('id');
+        expect(res.body.results[0]).toHaveProperty('name');
+        expect(res.body.results[0]).toHaveProperty('status');
+        expect(res.body.results[0]).toHaveProperty('species');
+        expect(res.body.results[0]).toHaveProperty('type');
+        expect(res.body.results[0]).toHaveProperty('gender');
+        expect(res.body.results[0]).toHaveProperty('origin');
+        expect(res.body.results[0]).toHaveProperty('location');
+        expect(res.body.results[0]).toHaveProperty('image');
+        expect(res.body.results[0]).toHaveProperty('episode');
+        expect(res.body.results[0]).toHaveProperty('url');
+        expect(res.body.results[0]).toHaveProperty('created');
       });
   });
 
-  it('(GET) /characters - with invalid query params', () => {
+  it('(GET) /character - with query params', async () => {
+    createMock({
+      url: `${appConfig.services.rickAndMortyAPI.url}/character`,
+      method: 'get',
+      statusCode: 200,
+      options: {
+        encodedQueryParams: true,
+      },
+      queryParams: {
+        page: 1,
+        name: 'rick',
+        status: 'dead',
+        gender: 'male',
+      },
+      responseBody: readFixtureFile('../fixtures/characters/response-params-200.json'),
+    });
     return request(app.getHttpServer())
       .get('/characters')
-      .query({ page: 1000 })
-      .query({ name: 'morty' })
-      .query({ status: 'alive' })
-      .query({ gender: 'female' })
-      .expect(404);
+      .query({ page: 1 })
+      .query({ name: 'rick' })
+      .query({ status: 'dead' })
+      .query({ gender: 'male' })
+      .expect(200)
+      .expect((res) => {
+        expect(res.body).toHaveProperty('info');
+        expect(res.body.info).toHaveProperty('count', 54);
+        expect(res.body.info).toHaveProperty('pages', 3);
+        expect(res.body.info).toHaveProperty('next');
+        expect(res.body.info).toHaveProperty('prev');
+        expect(res.body).toHaveProperty('results');
+        expect(res.body.results.length).toBeGreaterThan(0);
+        expect(res.body.results[0]).toHaveProperty('id');
+        expect(res.body.results[0]).toHaveProperty('name');
+        expect(res.body.results[0]).toHaveProperty('status');
+        expect(res.body.results[0]).toHaveProperty('species');
+        expect(res.body.results[0]).toHaveProperty('type');
+        expect(res.body.results[0]).toHaveProperty('gender');
+        expect(res.body.results[0]).toHaveProperty('origin');
+        expect(res.body.results[0]).toHaveProperty('location');
+        expect(res.body.results[0]).toHaveProperty('image');
+        expect(res.body.results[0]).toHaveProperty('episode');
+        expect(res.body.results[0]).toHaveProperty('url');
+        expect(res.body.results[0]).toHaveProperty('created');
+      });
+  });
+
+  it('(GET) /character - with invalid query params', async () => {
+    createMock({
+      url: `${appConfig.services.rickAndMortyAPI.url}/character`,
+      method: 'get',
+      statusCode: 404,
+      options: {
+        encodedQueryParams: true,
+      },
+      queryParams: {
+        page: 9999,
+      },
+      responseBody: readFixtureFile('../fixtures/characters/response-404.json'),
+    });
+    return request(app.getHttpServer())
+      .get('/characters')
+      .query({ page: 9999 })
+      .expect(404)
+      .catch((_error) => {
+        expect(_error).toBeInstanceOf(Error);
+        expect(_error.response.errors.message).toBe('There is nothing here');
+        expect(_error.status).toBe(HttpStatus.NOT_FOUND);
+      });
   });
 
   it('(POST) /users', async () => {
