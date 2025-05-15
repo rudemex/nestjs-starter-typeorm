@@ -5,24 +5,24 @@
 # EXAMPLES
 
 # Standar build
-# docker build -t nestjs-starter .
+# docker build -t nestjs-starter-typeorm .
 
 # Build with ARG
 # docker build --build-arg NODE_VERSION=18.20.4-alpine --build-arg APP_PORT=3000 --build-arg IMAGE_NAME=my-nestjs-app -t mi-imagen .
 
 # Run
-# docker run -d -p 8080:8080 --name nestjs-starter-app --env-file .env nestjs-starter
-# docker run -it -p 8080:8080 --name nestjs-starter-app --env-file .env nestjs-starter
+# docker run -d -p 8080:8080 --name nestjs-starter-typeorm-app --env-file .env nestjs-starter-typeorm
+# docker run -it -p 8080:8080 --name nestjs-starter-typeorm-app --env-file .env nestjs-starter-typeorm
 # docker system prune
 
-#docker run -it --rm --entrypoint=sh nestjs-starter
+#docker run -it --rm --entrypoint=sh nestjs-starter-typeorm
 
 
 
 ARG NODE_VERSION=20.19.0-alpine
 ARG NODE_ENV=build
 ARG APP_PORT=8080
-ARG IMAGE_NAME=nestjs-starter
+ARG IMAGE_NAME=nestjs-starter-typeorm
 
 # Utiliza una versión ligera de Node.js como imagen base
 FROM node:${NODE_VERSION} AS builder
