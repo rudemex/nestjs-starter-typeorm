@@ -60,7 +60,6 @@ export default registerAs(
         synchronize: process.env.DATABASE_DB_SYNC.toLowerCase() === 'true',
         autoLoadEntities: process.env.DATABASE_DB_AUTO_LOAD_ENTITIES.toLowerCase() === 'true',
         entities: [`${__dirname}/**/*.entity{.ts,.js}`],
-        insecureAuth: process.env.DATABASE_INSECURE_AUTH.toLowerCase() === 'true',
       } as TypeOrmModuleOptions,
     },
     params: {
