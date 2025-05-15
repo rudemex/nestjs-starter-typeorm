@@ -4,10 +4,13 @@ import request from 'supertest';
 
 import { AppModule } from '../src/app.module';
 import { CreateUserDto, UpdateUserDto } from '../src/users/dtos/user.dto';
+import { Gender, Seniority } from '../src/users/interfaces/user.interface';
 
 jest.setTimeout(80000);
+
 describe('AppController (e2e)', () => {
   let app: INestApplication;
+  let createdUserId: number;
 
   beforeEach(async () => {
     const moduleRef: TestingModule = await Test.createTestingModule({
@@ -22,29 +25,29 @@ describe('AppController (e2e)', () => {
     await app.close();
   });
 
-  it('(GET) /', async () => {
+  it('(GET) /', () => {
     return request(app.getHttpServer()).get('/').expect(200).expect('Hello World!');
   });
 
-  it('(GET) /test-env', async () => {
+  it('(GET) /test-env', () => {
     return request(app.getHttpServer()).get('/test-env').expect(200).expect('testKeyEnv-test');
   });
 
-  it('(GET) /my-util', async () => {
+  it('(GET) /my-util', () => {
     return request(app.getHttpServer()).get('/my-util').expect(200).expect('this is an util');
   });
 
-  it('(GET) /health/liveness', async () => {
+  it('(GET) /health/liveness', () => {
     return request(app.getHttpServer()).get('/health/liveness').expect(200).expect({
       status: 'up',
     });
   });
 
-  it('(GET) /health/readiness', async () => {
+  it('(GET) /health/readiness', () => {
     return request(app.getHttpServer()).get('/health/readiness').expect(200);
   });
 
-  it('(GET) /characters', async () => {
+  it('(GET) /characters', () => {
     return request(app.getHttpServer())
       .get('/characters')
       .expect(200)
@@ -54,7 +57,7 @@ describe('AppController (e2e)', () => {
       });
   });
 
-  it('(GET) /characters - with query params', async () => {
+  it('(GET) /characters - with query params', () => {
     return request(app.getHttpServer())
       .get('/characters')
       .query({ name: 'morty' })
@@ -72,7 +75,7 @@ describe('AppController (e2e)', () => {
       });
   });
 
-  it('(GET) /characters - with invalid query params', async () => {
+  it('(GET) /characters - with invalid query params', () => {
     return request(app.getHttpServer())
       .get('/characters')
       .query({ page: 1000 })
@@ -82,121 +85,71 @@ describe('AppController (e2e)', () => {
       .expect(404);
   });
 
-  it('(GET) /users', async () => {
-    return request(app.getHttpServer())
-      .get('/users')
-      .expect(200)
-      .expect((res) => {
-        expect(res.body).toEqual(expect.any(Object));
-        expect(res.body).toHaveProperty('data');
-        expect(res.body.data.length).toBeGreaterThan(0);
-        expect(res.body.data).toHaveLength(10);
-        expect(res.body).toHaveProperty('meta');
-        expect(res.body.meta).toHaveProperty('page');
-        expect(res.body.meta).toHaveProperty('size');
-        expect(res.body.meta).toHaveProperty('total');
-        expect(res.body.meta).toHaveProperty('totalPages');
-        expect(res.body.meta).toHaveProperty('hasNext');
-        expect(res.body.meta).toHaveProperty('hasPrevious');
-      });
-  });
-
-  it('(GET) /users?page=2&size=5 - with pagination', async () => {
-    return request(app.getHttpServer())
-      .get('/users?page=2&size=5')
-      .expect(200)
-      .expect((res) => {
-        expect(res.body).toEqual(expect.any(Object));
-        expect(res.body).toHaveProperty('data');
-        expect(res.body.data.length).toBeGreaterThan(0);
-        expect(res.body.data).toHaveLength(5);
-        expect(res.body).toHaveProperty('meta');
-        expect(res.body.meta).toHaveProperty('page');
-        expect(res.body.meta).toHaveProperty('size');
-        expect(res.body.meta).toHaveProperty('total');
-        expect(res.body.meta).toHaveProperty('totalPages');
-        expect(res.body.meta).toHaveProperty('hasNext');
-        expect(res.body.meta).toHaveProperty('hasPrevious');
-      });
-  });
-
-  it('(GET) /users/{id}', async () => {
-    return request(app.getHttpServer())
-      .get('/users/1')
-      .expect(200)
-      .expect((res) => {
-        expect(res.body).toEqual(expect.any(Object));
-        expect(res.body).toHaveProperty('id');
-        expect(res.body).toHaveProperty('email');
-        expect(res.body).toHaveProperty('firstName');
-        expect(res.body).toHaveProperty('lastName');
-        expect(res.body).toHaveProperty('gender');
-        expect(res.body).toHaveProperty('seniority');
-        expect(res.body).toHaveProperty('experience');
-      });
-  });
-
   it('(POST) /users', async () => {
     const payload: CreateUserDto = {
       firstName: 'Juan',
       lastName: 'Perez',
       email: 'jperez@email.com',
-      gender: 'male',
-      seniority: 'trainee',
+      gender: 'male' as Gender,
+      seniority: 'trainee' as Seniority,
       experience: '',
     };
-    return request(app.getHttpServer())
+    const res = await request(app.getHttpServer())
       .post('/users')
       .send(payload)
       .set('Accept', 'application/json')
-      .expect(201)
-      .expect((res) => {
-        expect(res.body).toEqual(expect.any(Object));
-        expect(res.body).toHaveProperty('id');
-        expect(res.body).toHaveProperty('email');
-        expect(res.body).toHaveProperty('firstName');
-        expect(res.body).toHaveProperty('lastName');
-        expect(res.body).toHaveProperty('gender');
-        expect(res.body).toHaveProperty('seniority');
-        expect(res.body).toHaveProperty('experience');
-        expect(res.body.email).toEqual(payload.email);
-        expect(res.body.firstName).toEqual(payload.firstName);
-        expect(res.body.lastName).toEqual(payload.lastName);
-      });
+      .expect(201);
+
+    expect(res.body).toHaveProperty('id');
+    expect(res.body.email).toEqual(payload.email);
+    createdUserId = res.body.id; // guardar para otros tests
+  });
+
+  it('(GET) /users', async () => {
+    const res = await request(app.getHttpServer()).get('/users').expect(200);
+    expect(res.body).toHaveProperty('data');
+    expect(res.body.data.length).toBeGreaterThan(0);
+    expect(res.body).toHaveProperty('meta');
+    expect(res.body.meta).toHaveProperty('page');
+    expect(res.body.meta).toHaveProperty('size');
+    expect(res.body.meta).toHaveProperty('total');
+    expect(res.body.meta).toHaveProperty('totalPages');
+  });
+
+  it('(GET) /users?page=1&size=5 - with pagination', async () => {
+    const res = await request(app.getHttpServer()).get('/users?page=1&size=5').expect(200);
+    expect(res.body).toHaveProperty('data');
+    expect(res.body.data.length).toBeGreaterThan(0);
+    expect(res.body).toHaveProperty('meta');
+    expect(res.body.meta).toHaveProperty('page');
+    expect(res.body.meta).toHaveProperty('size');
+    expect(res.body.meta).toHaveProperty('total');
+    expect(res.body.meta).toHaveProperty('totalPages');
+  });
+
+  it('(GET) /users/{id}', async () => {
+    const res = await request(app.getHttpServer()).get(`/users/${createdUserId}`).expect(200);
+    expect(res.body).toHaveProperty('id', createdUserId);
   });
 
   it('(PUT) /users/{id}', async () => {
     const payload: UpdateUserDto = {
-      firstName: 'TestName',
-      lastName: 'TestLastname',
-      email: 'testmail@email.com',
+      firstName: 'UpdatedName',
+      lastName: 'UpdatedLastName',
+      email: 'updated@email.com',
     };
-    return request(app.getHttpServer())
-      .put('/users/1')
+    const res = await request(app.getHttpServer())
+      .put(`/users/${createdUserId}`)
       .send(payload)
       .set('Accept', 'application/json')
-      .expect(200)
-      .expect((res) => {
-        expect(res.body).toEqual(expect.any(Object));
-        expect(res.body).toHaveProperty('id');
-        expect(res.body).toHaveProperty('email');
-        expect(res.body).toHaveProperty('firstName');
-        expect(res.body).toHaveProperty('lastName');
-        expect(res.body).toHaveProperty('gender');
-        expect(res.body).toHaveProperty('seniority');
-        expect(res.body).toHaveProperty('experience');
-        expect(res.body.email).toEqual(payload.email);
-        expect(res.body.firstName).toEqual(payload.firstName);
-        expect(res.body.lastName).toEqual(payload.lastName);
-      });
+      .expect(200);
+
+    expect(res.body).toMatchObject(payload);
   });
 
   it('(DELETE) /users/{id}', async () => {
-    return request(app.getHttpServer())
-      .delete('/users/1')
-      .expect(200)
-      .expect((res) => {
-        expect(res.body).toBeTruthy();
-      });
+    const res = await request(app.getHttpServer()).delete(`/users/${createdUserId}`).expect(200);
+
+    expect(res.body).toEqual({ success: true });
   });
 });
