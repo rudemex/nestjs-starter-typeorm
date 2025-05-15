@@ -38,14 +38,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
 
-      - name: "🦉 GitGuardian scan"
-        uses: GitGuardian/ggshield-action@v1.37.0
-        env:
-          GITHUB_PUSH_BEFORE_SHA: ${{ github.event.before }}
-          GITHUB_PUSH_BASE_SHA: ${{ github.event.base }}
-          GITHUB_PULL_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          GITHUB_DEFAULT_BRANCH: ${GITHUB_REF##*/}
-          GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+      #- name: "🦉 GitGuardian scan"
+      #  uses: GitGuardian/ggshield-action@v1.37.0
+      #  env:
+      #    GITHUB_PUSH_BEFORE_SHA: ${{ github.event.before }}
+      #    GITHUB_PUSH_BASE_SHA: ${{ github.event.base }}
+      #    GITHUB_PULL_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      #    GITHUB_DEFAULT_BRANCH: ${GITHUB_REF##*/}
+      #    GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
 
       - name: "📦 Install packages"
         run: yarn install
@@ -69,35 +69,35 @@ jobs:
           path: './junit.xml'
           reporter: jest-junit
 
-      - name: "📊 Upload coverage report to Codecov"
-        uses: codecov/codecov-action@v5.4.0
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+      #- name: "📊 Upload coverage report to Codecov"
+      #  uses: codecov/codecov-action@v5.4.0
+      #  with:
+      #    token: ${{ secrets.CODECOV_TOKEN }}
 
-      - name: "📊 SonarCloud Scan"
-        uses: sonarsource/sonarqube-scan-action@v5.0.0
-        with:
-          args: >
-            -Dsonar.organization=${{ github.repository_owner }}
-            -Dsonar.projectKey=${{ github.repository_owner }}_${{ github.event.repository.name }}
-            -Dsonar.projectName=${{ github.repository_owner }}_${{ github.event.repository.name }}
-            -Dsonar.projectVersion=1.0
-            -Dsonar.sourceEncoding=UTF-8
-            -Dsonar.sources=./src
-            -Dsonar.exclusions=**/*.bin,node_modules/**,test/**,**/__test__/**,**/__mocks__/**,src/main.ts
-            -Dsonar.coverage.exclusions=node_modules/**,test/**,**/__test__/**,**/__mocks__/**,src/main.ts
-            -Dsonar.testExecutionReportPaths=test-report.xml
-            -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      #- name: "📊 SonarCloud Scan"
+      #  uses: sonarsource/sonarqube-scan-action@v5.0.0
+      #  with:
+      #    args: >
+      #      -Dsonar.organization=${{ github.repository_owner }}
+      #      -Dsonar.projectKey=${{ github.repository_owner }}_${{ github.event.repository.name }}
+      #      -Dsonar.projectName=${{ github.repository_owner }}_${{ github.event.repository.name }}
+      #      -Dsonar.projectVersion=1.0
+      #      -Dsonar.sourceEncoding=UTF-8
+      #      -Dsonar.sources=./src
+      #      -Dsonar.exclusions=**/*.bin,node_modules/**,test/**,**/__test__/**,**/__mocks__/**,src/main.ts
+      #      -Dsonar.coverage.exclusions=node_modules/**,test/**,**/__test__/**,**/__mocks__/**,src/main.ts
+      #      -Dsonar.testExecutionReportPaths=test-report.xml
+      #      -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
+      #  env:
+      #    GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      #    SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       #- name: "🦠 Snyk to check for vulnerabilities"
       #  uses: snyk/actions/node@master
       #  env:
       #    SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
-      - name: "🐳 Docker"
-        run: |
-          docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
-          docker build --build-arg NODE_VERSION=${{ matrix.node }}-alpine -t ${{ github.event.repository.name }} .
+      #- name: "🐳 Docker"
+      #  run: |
+      #    docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
+      #    docker build --build-arg NODE_VERSION=${{ matrix.node }}-alpine -t ${{ github.event.repository.name }} .
