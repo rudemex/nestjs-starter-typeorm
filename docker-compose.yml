@@ -47,6 +47,21 @@ services:
     #volumes:
     #  - ./.mysql-data/db:/var/lib/mysql
 
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: local-phpmyadmin
+    restart: always
+    ports:
+      - '9090:80'
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: root
+      PMA_PASSWORD: 123456
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: 123456
+    depends_on:
+      - mysql
+
   mongo:
     #image: mongo:5.0
     image: mongo:8.0.6
